@@ -1,9 +1,15 @@
 <html>
 
 <head>
+    <title>BRICKS</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="application/javascript">
+
+
         function drawIt() {
+
             var x = 150;
             var y = 150;
             var dx = 2;
@@ -16,12 +22,14 @@
             var paddleh;
             var paddlew;
             var tocke;
+            var IntervalId;
             //timer
             var sekunde;
             var sekundeI;
             var minuteI;
             var intTimer;
             var izpisTimer;
+            var start = true;
 
             function init_paddle() {
                 paddlex = 2;
@@ -33,7 +41,7 @@
                 ctx = $('#canvas')[0].getContext("2d");
                 // dodajanje kode v metodo init
                 tocke = 0;
-
+                start=false;
                 sekunde = 0;
                 izpisTimer = "00:00";
                 intTimer = setInterval(timer, 1000);
@@ -41,7 +49,20 @@
                 $("#tocke").html(tocke);
                 WIDTH = $("#canvas").width();
                 HEIGHT = $("#canvas").height();
-                return setInterval(draw, 10);
+                //welcome sweet alert
+                Swal.fire({
+                    title: 'WELCOME TO BRICKS GAME!',
+                    html: 'Click "START" and try to break all the bricks!',
+                    confirmButtonColor: 'rgb(204, 85, 0)',
+                    color: 'black',
+                    confirmButtonText: 'START'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        //start igre
+                        start=true;
+                        return intervalId=setInterval(draw, 10);
+                    }
+                });
 
             }
 
@@ -110,6 +131,7 @@
                 BRICKHEIGHT = 15;
                 PADDING = 1;
                 bricks = new Array(NROWS);
+                brickPoints = [5, 4, 3, 2, 1]; //tocke za vsako vrstico
                 for (i = 0; i < NROWS; i++) {
                     bricks[i] = new Array(NCOLS);
                     for (j = 0; j < NCOLS; j++) {
@@ -119,13 +141,20 @@
             }
 
             function timer() {
-                sekunde++;
+                if (start == true) {
+                    sekunde++;
 
-                sekundeI = ((sekundeI = (sekunde % 60)) > 9) ? sekundeI : "0" + sekundeI;
-                minuteI = ((minuteI = Math.floor(sekunde / 60)) > 9) ? minuteI : "0" + minuteI;
-                izpisTimer = minuteI + ":" + sekundeI;
+                    sekundeI = ((sekundeI = (sekunde % 60)) > 9) ? sekundeI : "0" + sekundeI;
+                    minuteI = ((minuteI = Math.floor(sekunde / 60)) > 9) ? minuteI : "0" + minuteI;
+                    izpisTimer = minuteI + ":" + sekundeI;
 
-                $("#cas").html(izpisTimer);
+                    $("#cas").html(izpisTimer);
+                }
+                else {
+                    sekunde = 0;
+                    //izpisTimer = "00:00";
+                    $("#cas").html(izpisTimer);
+                }
             }
 
             //END LIBRARY CODE
@@ -167,39 +196,89 @@
                 //Če smo zadeli opeko, vrni povratno kroglo in označi v tabeli, da opeke ni več
                 if (y < NROWS * rowheight && row >= 0 && col >= 0 && bricks[row][col] == 1) {
                     dy = -dy; bricks[row][col] = 0;
-                    tocke += 1; //v primeru, da imajo opeko večjo utež lahko prištevate tudi npr. 2 ali 3; pred tem bi bilo smiselno dodati še kakšen pogoj, ki bi signaliziral mesta opek, ki imajo višjo vrednost
+                    var points = brickPoints[row]; // tocke za vrstico
+                    tocke += points;
                     $("#tocke").html(tocke);
                 }
+
                 if (x + dx > WIDTH - r || x + dx < 0 + r)
                     dx = -dx;
+
                 if (y + dy < 0 + r)
                     dy = -dy;
+
                 else if (y + dy > HEIGHT - r) {
-                    //Odboj kroglice, ki je odvisen od odboja od ploščka 
                     if (x > paddlex && x < paddlex + paddlew) {
                         dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
                         dy = -dy;
+                        start = true;
+                        paddleEnabled = true;
+                    } else {
+                        start = false;
+                        Swal.fire({
+                            title: 'GAME OVER!',
+                            html: `The ball touched the ground! You can try again! <br> Score: ${tocke}<br>Time: ${izpisTimer}`,                            
+                            icon: 'error',
+                            color: 'black',
+                            background: 'aliceblue',
+                            confirmButtonColor: 'rgb(204, 85, 0)',
+                            confirmButtonText: 'DO BETTER NOW',
+                            backdrop: `rgba(204, 85, 0,0.2)`
+                            
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                        dx = 0;
+                        dy = 0; //mogu sem dat to pred clearInterval ker drugace se sweetalert ne pojavi!
+                        clearInterval(intervalId);
                     }
 
-                    else if (y + dy > HEIGHT - r)
-                        clearInterval(intervalId);
+
                 }
+                //pogleda ce so vse mozne tocke zadete
+                if (tocke >= 2) {
+                    start = false; // ustavi igro
+                    clearInterval(intervalId);
+                    // Show sweet alert
+                    Swal.fire({
+                        title: 'Congratulations!',
+                        html: `You have reached 75 points!<br>Time: ${izpisTimer}`,
+                        icon: 'success',
+                        confirmButtonColor: 'rgb(204, 85, 0)',
+                        backdrop: `rgba(204, 85, 0,0.2)`
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            dx = 0;
+                            dy = 0;                       
+                            location.reload(); // Reload the page to restart the game
+                        }
+                    });
+
+                }
+
                 x += dx;
                 y += dy;
+
             }
-            init();
             init_paddle();
+            init();
             init_mouse();
             initbricks();
-            timer();
         }
     </script>
 </head>
 
 <body onload="drawIt()">
-    <canvas id="canvas" width="400" height="400"></canvas>
-    <p>Točke: <mark id="tocke">0</mark></p>
-    <p>Čas: <mark id="cas">00:00</mark></p>
+    <p>BRICKS</p>
+    <div id="center">
+        <canvas id="canvas" width="600" height="500"></canvas>
+    </div>
+    <div class="centriraj">
+        <p class="tocke">TOČKE: <mark id="tocke">0</mark></p>
+        <p class="cas">ČAS: <mark id="cas">00:00</mark></p>
+    </div>
 </body>
 
 </html>
