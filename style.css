@@ -9,22 +9,22 @@
 }
 
 #center{
-    
 	position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(90deg, rgba(255,88,2,255) 10%, rgba(114,123,128,255) 80%);
+    background: rgb(69, 171, 177);
 	background-repeat:no-repeat;
     border-radius: 5px;
-	border:black 5px solid;
-    box-shadow: 0 0 10px 5px;
+	border:rgb(169, 175, 180) 5px solid;
+    box-shadow: rgb(169, 175, 180) 0 0 10px 5px;
+    z-index: 1;
 }
 
 body{
     margin: 0;
     padding: 0;
-	background: linear-gradient(90deg, rgba(114,123,128,255) 50%, rgba(255,88,2,255) 52%);
+	background: rgb(0, 42, 125);
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -41,6 +41,7 @@ p{
     text-align: center;
     font-size: 135px;
     font-family: 'bricks';
+    color: aliceblue;
 }
 
 
@@ -49,6 +50,7 @@ p{
 	float: left;
 	font-family: 'bricks';
 	font-size: 2em;
+    color: aliceblue;
 }
 
 .cas {
@@ -56,6 +58,7 @@ p{
 	float: right;
 	font-family: 'bricks';
 	font-size: 2em;
+    color: aliceblue;
 }
 
 .centriraj {
@@ -69,6 +72,7 @@ p{
 
 mark {
     background-color: transparent;
+    color: aliceblue;
   }
 
 .swal2-title {
@@ -99,4 +103,22 @@ mark {
     word-wrap: break-word;
     word-break: break-word;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+#submarineLeva{
+    position: absolute;
+    margin-top: 170px;
+    left: 20px;
+    z-index: -1;
+}
+
+.submarineDesno {
+    position: absolute;
+    top: 170px;
+    right: 20px;
+    z-index: -1;
+}
+
+.submarineDesno img {
+    max-width: 100%;
 }

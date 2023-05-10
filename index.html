@@ -2,18 +2,20 @@
 
 <head>
     <title>BRICKS</title>
+    <link rel="icon" type="image/x-icon" href="logo1.png">
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script type="application/javascript">
 
-
+        var ballSpeed;
         function drawIt() {
 
             var x = 150;
             var y = 150;
-            var dx = 2;
-            var dy = 4;
+            var dx;
+            var dy;
             var WIDTH;
             var HEIGHT;
             var r = 10;
@@ -41,7 +43,7 @@
                 ctx = $('#canvas')[0].getContext("2d");
                 // dodajanje kode v metodo init
                 tocke = 0;
-                start=false;
+                start = false;
                 sekunde = 0;
                 izpisTimer = "00:00";
                 intTimer = setInterval(timer, 1000);
@@ -52,23 +54,81 @@
                 //welcome sweet alert
                 Swal.fire({
                     title: 'WELCOME TO BRICKS GAME!',
-                    html: 'Click "START" and try to break all the bricks!',
-                    confirmButtonColor: 'rgb(204, 85, 0)',
-                    color: 'black',
-                    confirmButtonText: 'START'
+                    html: 'Try to brek all the brick. You can use keyboard arrows or mouse to move the puck. <br>  Choose the speed of the ball:',
+                    input: 'select',
+                    inputOptions: {
+                        slow: 'Slow',
+                        medium: 'Medium',
+                        fast: 'Fast'
+                    },
+                    inputPlaceholder: 'Select speed',
+                    inputValue: 'slow',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Start',
+                    confirmButtonColor: 'rgb(69, 171, 177)',
+                    allowOutsideClick: false,
+                    backdrop: `rgba(0, 0, 0, 0.6)`
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        //start igre
-                        start=true;
-                        return intervalId=setInterval(draw, 10);
+                        var speed = result.value;
+                        setBallSpeed(speed);
                     }
                 });
 
             }
 
+            function setBallSpeed(speed) {
+                if (speed === 'slow') {
+                    dx = 2;
+                    dy = 4;
+                } else if (speed === 'medium') {
+                    dx = 3;
+                    dy = 6;
+                } else if (speed === 'fast') {
+                    dx = 4;
+                    dy = 8;
+                }
+                start = false;
+                intervalId = setInterval(draw, 10);// Start the game
+            }
+
+            function Rect(x, y, width, height, radius) {
+            // Set the design properties for the blocks
+            ctx.fillStyle = '#ffffff'; // Change the fill color
+            ctx.strokeStyle = '#00000'; // Change the stroke color
+            ctx.lineWidth = 2; // Change the stroke width
+            ctx.fillRect(x, y, width, height);
+            // Draw the block
+
+            // Calculate the coordinates for drawing the rounded rectangle
+            var x = (j * (BRICKWIDTH + PADDING)) + PADDING;
+            var y = (i * (BRICKHEIGHT + PADDING)) + PADDING;
+            var width = BRICKWIDTH;
+            var height = BRICKHEIGHT;
+            var cornerRadius = 1; // Adjust the corner radius to make the blocks more or less round
+
+            // Draw the rounded rectangle
+            ctx.beginPath();
+            ctx.moveTo(x + cornerRadius, y);
+            ctx.lineTo(x + width - cornerRadius, y);
+            ctx.arcTo(x + width, y, x + width, y + cornerRadius, cornerRadius);
+            ctx.lineTo(x + width, y + height - cornerRadius);
+            ctx.arcTo(x + width, y + height, x + width - cornerRadius, y + height, cornerRadius);
+            ctx.lineTo(x + cornerRadius, y + height);
+            ctx.arcTo(x, y + height, x, y + height - cornerRadius, cornerRadius);
+            ctx.lineTo(x, y + cornerRadius);
+            ctx.arcTo(x, y, x + cornerRadius, y, cornerRadius);
+            ctx.closePath();
+
+            ctx.fill();
+            ctx.stroke();
+            }
+
             function circle(x, y, r) {
                 ctx.beginPath();
                 ctx.arc(x, y, r, 0, Math.PI * 2, true);
+                ctx.fillStyle = '#000000';
                 ctx.closePath();
                 ctx.fill();
             }
@@ -136,6 +196,7 @@
                     bricks[i] = new Array(NCOLS);
                     for (j = 0; j < NCOLS; j++) {
                         bricks[i][j] = 1;
+
                     }
                 }
             }
@@ -176,13 +237,13 @@
                         paddlex = 0;
                     }
                 }
-                rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
+                Rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
 
                 //riši opeke
                 for (i = 0; i < NROWS; i++) {
                     for (j = 0; j < NCOLS; j++) {
                         if (bricks[i][j] == 1) {
-                            rect((j * (BRICKWIDTH + PADDING)) + PADDING,
+                            Rect((j * (BRICKWIDTH + PADDING)) + PADDING,
                                 (i * (BRICKHEIGHT + PADDING)) + PADDING,
                                 BRICKWIDTH, BRICKHEIGHT);
                         }
@@ -217,14 +278,14 @@
                         start = false;
                         Swal.fire({
                             title: 'GAME OVER!',
-                            html: `The ball touched the ground! You can try again! <br> Score: ${tocke}<br>Time: ${izpisTimer}`,                            
+                            html: `The ball touched the ground! You can try again! <br> Score: ${tocke}<br>Time: ${izpisTimer}`,
                             icon: 'error',
                             color: 'black',
                             background: 'aliceblue',
-                            confirmButtonColor: 'rgb(204, 85, 0)',
+                            confirmButtonColor: 'rgb(69, 171, 177)',
                             confirmButtonText: 'DO BETTER NOW',
-                            backdrop: `rgba(204, 85, 0,0.2)`
-                            
+                            backdrop: `rgb(69, 171, 177, 0.2)`
+
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 location.reload();
@@ -246,12 +307,12 @@
                         title: 'Congratulations!',
                         html: `You have reached 75 points!<br>Time: ${izpisTimer}`,
                         icon: 'success',
-                        confirmButtonColor: 'rgb(204, 85, 0)',
-                        backdrop: `rgba(204, 85, 0,0.2)`
+                        confirmButtonColor: 'rgb(69, 171, 177)',
+                        backdrop: `rgb(69, 171, 177, 0.2)`
                     }).then((result) => {
                         if (result.isConfirmed) {
                             dx = 0;
-                            dy = 0;                       
+                            dy = 0;
                             location.reload(); // Reload the page to restart the game
                         }
                     });
@@ -273,12 +334,20 @@
 <body onload="drawIt()">
     <p>BRICKS</p>
     <div id="center">
+        
         <canvas id="canvas" width="600" height="500"></canvas>
     </div>
     <div class="centriraj">
         <p class="tocke">TOČKE: <mark id="tocke">0</mark></p>
         <p class="cas">ČAS: <mark id="cas">00:00</mark></p>
     </div>
+
+    <img id="submarineLeva" src="submarine.png" alt="submarineLeva">
+
+    <div class="submarineDesno">
+        <img id="submarineDesno" src="submarineH.png" alt="submarineDesna">
+    </div>
+
 </body>
 
 </html>
